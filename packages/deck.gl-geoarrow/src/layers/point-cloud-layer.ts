@@ -89,7 +89,7 @@ const defaultProps: DefaultProps<GeoArrowPointCloudLayerProps> = {
 };
 
 export class GeoArrowPointCloudLayer<
-  ExtraProps extends object = Record<string, never>,
+  ExtraProps extends object = object,
 > extends CompositeLayer<GeoArrowPointCloudLayerProps & ExtraProps> {
   static override defaultProps = defaultProps;
   static override layerName = "GeoArrowPointCloudLayer";

@@ -95,7 +95,7 @@ const defaultProps: DefaultProps<GeoArrowS2LayerProps> = {
 };
 
 export class GeoArrowS2Layer<
-  ExtraProps extends object = Record<string, never>,
+  ExtraProps extends object = object,
 > extends CompositeLayer<GeoArrowS2LayerProps & ExtraProps> {
   static override defaultProps = defaultProps;
   static override layerName = "GeoArrowS2Layer";

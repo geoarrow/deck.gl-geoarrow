@@ -94,7 +94,7 @@ export const defaultProps: DefaultProps<GeoArrowPathLayerProps> = {
  * Render lists of coordinate points as extruded polylines with mitering.
  */
 export class GeoArrowPathLayer<
-  ExtraProps extends object = Record<string, never>,
+  ExtraProps extends object = object,
 > extends CompositeLayer<GeoArrowPathLayerProps & ExtraProps> {
   static override defaultProps = defaultProps;
   static override layerName = "GeoArrowPathLayer";
