@@ -30,7 +30,6 @@ jobs:
       - run: pnpm build
       - run: pnpm test
 
-      # Might need --recursive in this publish command?
       - name: Read version and publish
         env:
           # Clear the sentinel value setup-node writes; otherwise npm tries to
@@ -40,7 +39,7 @@ jobs:
         run: |
           VERSION=$(jq -r .version packages/deck.gl-geoarrow/package.json)
           if [[ "$VERSION" == *alpha* || "$VERSION" == *beta* ]]; then
-            pnpm publish --no-git-checks --tag beta
+            pnpm --filter @geoarrow/deck.gl-geoarrow publish --no-git-checks --tag beta
           else
-            pnpm publish --no-git-checks
+            pnpm --filter @geoarrow/deck.gl-geoarrow publish --no-git-checks
           fi
