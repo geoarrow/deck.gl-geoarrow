@@ -1,7 +1,5 @@
 # @geoarrow/deck.gl-geoarrow
 
-> Note: this project is in the process of renaming from `@geoarrow/deck.gl-layers` to `@geoarrow/deck.gl-geoarrow`. It has not yet been published to NPM under `@geoarrow/deck.gl-geoarrow`.
-
 The easiest, most efficient way to render large geospatial datasets in [deck.gl](https://deck.gl), via [GeoArrow](https://geoarrow.org).
 
 This is just a _glue library_ to deck.gl. It generates the same layer objects as upstream deck.gl does, but uses a [low-level binary interface](https://deck.gl/docs/developer-guide/performance#supply-attributes-directly) for best performance. Using the binary interface directly is really easy to mess up. Instead, the layer classes exposed by `@geoarrow/deck.gl-geoarrow` focus on making the process easy to use and validating user input, and under the hood pass buffers to deck.gl's binary interface.
@@ -12,9 +10,9 @@ This is just a _glue library_ to deck.gl. It generates the same layer objects as
 
 ## Features
 
-- **Fast**: copies binary buffers directly from an [Arrow JS](https://www.npmjs.com/package/apache-arrow) [`Table`](https://arrow.apache.org/docs/js/classes/Arrow_dom.Table.html) object to the GPU using [deck.gl's binary data interface](https://deck.gl/docs/developer-guide/performance#supply-attributes-directly).
+- **Fast**: copies binary buffers directly from an [Arrow JS](https://www.npmjs.com/package/apache-arrow) [`RecordBatch`](https://arrow.apache.org/js/current/classes/Arrow.dom.Table.html#batches) object to the GPU using [deck.gl's binary data interface](https://deck.gl/docs/developer-guide/performance#supply-attributes-directly).
 - **Memory-efficient**: no intermediate data representation and no garbage-collector overhead.
-- **Full layer customization**: Use the same layer properties as in the upstream deck.gl layer documentation. Any _accessor_ (layer property prefixed with `get*`) can be passed an Arrow [`Vector`](https://arrow.apache.org/docs/js/classes/Arrow_dom.Vector.html).
+- **Full layer customization**: Use the same layer properties as in the upstream deck.gl layer documentation. Any _accessor_ (layer property prefixed with `get*`) can be passed an Arrow [`Data`](https://arrow.apache.org/js/current/classes/Arrow.dom.Data.html).
 - **Input validation**. Validation can be turned off via the `_validate` property on most layer types.
 - **Multi-threaded polygon triangulation**. When rendering polygon layers, a process called [polygon triangulation](https://en.wikipedia.org/wiki/Polygon_triangulation) must happen on the CPU before data can be copied to the GPU. Ordinarily, this can block the main thread for several seconds, but the `GeoArrowSolidPolygonLayer` will perform this process off the main thread, on up to 8 web workers.
 - **Progressive rendering support**. For streaming-capable data formats like Arrow IPC and Parquet, you can render a GeoArrow layer per chunk as the data loads.
@@ -33,20 +31,21 @@ With `@geoarrow/deck.gl-geoarrow` specifically, there are two ways to pass these
 
 ### Pre-computed Arrow columns
 
-If you have an Arrow column ([`Vector`](https://arrow.apache.org/docs/js/classes/Arrow_dom.Vector.html) in Arrow JS terminology), you can pass that directly into a layer:
+If you have an Arrow array ([`Data`](https://arrow.apache.org/js/current/classes/Arrow.dom.Data.html) in Arrow JS terminology), you can pass that directly into a layer:
 
 ```ts
 import { Table } from "apache-arrow";
 import { GeoArrowScatterplotLayer } from "@geoarrow/deck.gl-geoarrow";
 
 const table = new Table(...);
+const recordBatch = table.batches[0];
 const deckLayer = new GeoArrowScatterplotLayer({
   id: "scatterplot",
-  data: table,
+  data: recordBatch,
   /// Geometry column
-  getPosition: table.getChild("geometry")!,
+  getPosition: recordBatch.getChild("geometry")!,
   /// Column of type FixedSizeList[3] or FixedSizeList[4], with child type Uint8
-  getFillColor: table.getChild("colors")!,
+  getFillColor: recordBatch.getChild("colors")!,
 });
 ```
 
@@ -59,10 +58,9 @@ GeoArrow layers accept a callback that takes an object with `index` and `data`. 
 ```ts
 const deckLayer = new GeoArrowPathLayer({
   id: "geoarrow-path",
-  data: table,
+  data: recordBatch,
   getColor: ({ index, data, target }) => {
-    const recordBatch = data.data;
-    const row = recordBatch.get(index)!;
+    const row = data.get(index)!;
     return COLORS_LOOKUP[row["scalerank"]];
   },
 }),
@@ -88,11 +86,12 @@ import { GeoArrowScatterplotLayer } from "@geoarrow/deck.gl-geoarrow";
 
 const resp = await fetch("url/to/file.arrow");
 const jsTable = await tableFromIPC(resp);
+const recordBatch = jsTable.batches[0];
 const deckLayer = new GeoArrowScatterplotLayer({
   id: "scatterplot",
-  data: jsTable,
+  data: recordBatch,
   /// Replace with the correct geometry column name
-  getPosition: jsTable.getChild("geometry")!,
+  getPosition: recordBatch.getChild("geometry")!,
 });
 ```
 
@@ -111,11 +110,12 @@ const resp = await fetch("url/to/file.parquet");
 const arrayBuffer = await resp.arrayBuffer();
 const wasmTable = readParquet(new Uint8Array(arrayBuffer));
 const jsTable = tableFromIPC(wasmTable.intoIPCStream());
+const recordBatch = jsTable.batches[0];
 const deckLayer = new GeoArrowScatterplotLayer({
   id: "scatterplot",
-  data: jsTable,
+  data: recordBatch,
   /// Replace with the correct geometry column name
-  getPosition: jsTable.getChild("geometry")!,
+  getPosition: recordBatch.getChild("geometry")!,
 });
 ```
 
@@ -134,11 +134,12 @@ const resp = await fetch("url/to/file.parquet");
 const arrayBuffer = await resp.arrayBuffer();
 const wasmTable = readGeoParquet(new Uint8Array(arrayBuffer));
 const jsTable = tableFromIPC(wasmTable.intoTable().intoIPCStream());
+const recordBatch = jsTable.batches[0];
 const deckLayer = new GeoArrowScatterplotLayer({
   id: "scatterplot",
-  data: jsTable,
+  data: recordBatch,
   /// Replace with the correct geometry column name
-  getPosition: jsTable.getChild("geometry")!,
+  getPosition: recordBatch.getChild("geometry")!,
 });
 ```
 
@@ -157,11 +158,12 @@ const resp = await fetch("url/to/file.fgb");
 const arrayBuffer = await resp.arrayBuffer();
 const wasmTable = readFlatGeobuf(new Uint8Array(arrayBuffer));
 const jsTable = tableFromIPC(wasmTable.intoTable().intoIPCStream());
+const recordBatch = jsTable.batches[0];
 const deckLayer = new GeoArrowScatterplotLayer({
   id: "scatterplot",
-  data: jsTable,
+  data: recordBatch,
   /// Replace with the correct geometry column name
-  getPosition: jsTable.getChild("geometry")!,
+  getPosition: recordBatch.getChild("geometry")!,
 });
 ```
 
