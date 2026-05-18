@@ -6,16 +6,16 @@ import type { BinaryAttribute, Color, PickingInfo } from "@deck.gl/core";
 import type * as arrow from "apache-arrow";
 import type { Data } from "apache-arrow";
 
-type TypedArray =
-  | Int8Array
-  | Uint8Array
-  | Uint8ClampedArray
-  | Int16Array
-  | Uint16Array
-  | Int32Array
-  | Uint32Array
+export type TypedArray =
   | Float32Array
-  | Float64Array;
+  | Float64Array
+  | Int16Array
+  | Int32Array
+  | Int8Array
+  | Uint16Array
+  | Uint32Array
+  | Uint8Array
+  | Uint8ClampedArray;
 
 /**
  * An individual layer's data

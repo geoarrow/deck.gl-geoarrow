@@ -47,4 +47,12 @@ export { GeoArrowTextLayer as _GeoArrowTextLayer } from "./layers/text-layer.js"
 export type { GeoArrowTripsLayerProps } from "./layers/trips-layer.js";
 export { GeoArrowTripsLayer } from "./layers/trips-layer.js";
 
-export type { GeoArrowPickingInfo } from "./types.js";
+export type {
+  Accessor,
+  AccessorFunction,
+  ColorAccessor,
+  FloatAccessor,
+  GeoArrowPickingInfo,
+  NormalAccessor,
+  TimestampAccessor,
+} from "./types.js";
