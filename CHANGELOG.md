@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.1 - 2026-05-18
+
+* chore: Export types from types.ts through top-level package by @kylebarron in https://github.com/geoarrow/deck.gl-geoarrow/pull/210
+* fix: Extends object = object instead of never by @kylebarron in https://github.com/geoarrow/deck.gl-geoarrow/pull/211
+
+
+**Full Changelog**: https://github.com/geoarrow/deck.gl-geoarrow/compare/v0.4.0...v0.4.1
+
 ## 0.4.0 - 2026-05-18
 
 ### Breaking Changes
