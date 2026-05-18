@@ -101,7 +101,7 @@ const defaultProps: DefaultProps<GeoArrowScatterplotLayerProps> = {
 };
 
 export class GeoArrowScatterplotLayer<
-  ExtraProps extends object = Record<string, never>,
+  ExtraProps extends object = object,
 > extends CompositeLayer<GeoArrowScatterplotLayerProps & ExtraProps> {
   static override defaultProps = defaultProps;
   static override layerName = "GeoArrowScatterplotLayer";

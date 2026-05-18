@@ -110,7 +110,7 @@ const defaultProps: DefaultProps<GeoArrowColumnLayerProps> = {
  * coordinates.
  */
 export class GeoArrowColumnLayer<
-  ExtraProps extends object = Record<string, never>,
+  ExtraProps extends object = object,
 > extends CompositeLayer<GeoArrowColumnLayerProps & ExtraProps> {
   static override defaultProps = defaultProps;
   static override layerName = "GeoArrowColumnLayer";

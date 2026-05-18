@@ -76,7 +76,7 @@ const defaultProps: DefaultProps<GeoArrowHeatmapLayerProps> = {
 };
 
 export class GeoArrowHeatmapLayer<
-  ExtraProps extends object = Record<string, never>,
+  ExtraProps extends object = object,
 > extends CompositeLayer<GeoArrowHeatmapLayerProps & ExtraProps> {
   static override defaultProps = defaultProps;
   static override layerName = "GeoArrowHeatmapLayer";

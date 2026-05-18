@@ -189,7 +189,7 @@ const defaultProps: DefaultProps<GeoArrowSolidPolygonLayerProps> = {
 };
 
 export class GeoArrowSolidPolygonLayer<
-  ExtraProps extends object = Record<string, never>,
+  ExtraProps extends object = object,
 > extends CompositeLayer<GeoArrowSolidPolygonLayerProps & ExtraProps> {
   static override defaultProps = defaultProps;
   static override layerName = "GeoArrowSolidPolygonLayer";

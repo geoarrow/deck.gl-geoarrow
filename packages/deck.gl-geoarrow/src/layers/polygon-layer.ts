@@ -210,7 +210,7 @@ const defaultLineColor: [number, number, number, number] = [0, 0, 0, 255];
  * GeoArrowSolidPolygonLayer and the GeoArrowPathLayer.
  */
 export class GeoArrowPolygonLayer<
-  ExtraProps extends object = Record<string, never>,
+  ExtraProps extends object = object,
 > extends CompositeLayer<Required<GeoArrowPolygonLayerProps> & ExtraProps> {
   static override defaultProps = defaultProps;
   static override layerName = "GeoArrowPolygonLayer";

@@ -148,7 +148,7 @@ const defaultProps: DefaultProps<GeoArrowTextLayerProps> = {
 };
 
 export class GeoArrowTextLayer<
-  ExtraProps extends object = Record<string, never>,
+  ExtraProps extends object = object,
 > extends CompositeLayer<GeoArrowTextLayerProps & ExtraProps> {
   static override defaultProps = defaultProps;
   static override layerName = "GeoArrowTextLayer";

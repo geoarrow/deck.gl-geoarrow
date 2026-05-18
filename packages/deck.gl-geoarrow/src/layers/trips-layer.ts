@@ -89,7 +89,7 @@ const defaultProps: DefaultProps<GeoArrowTripsLayerProps> = {
 
 /** Render animated paths that represent vehicle trips. */
 export class GeoArrowTripsLayer<
-  ExtraProps extends object = Record<string, never>,
+  ExtraProps extends object = object,
 > extends CompositeLayer<GeoArrowTripsLayerProps & ExtraProps> {
   static override defaultProps = defaultProps;
   static override layerName = "GeoArrowTripsLayer";

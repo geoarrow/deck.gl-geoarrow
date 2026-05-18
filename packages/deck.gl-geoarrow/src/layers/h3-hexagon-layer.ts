@@ -99,7 +99,7 @@ const defaultProps: DefaultProps<GeoArrowH3HexagonLayerProps> = {
 };
 
 export class GeoArrowH3HexagonLayer<
-  ExtraProps extends object = Record<string, never>,
+  ExtraProps extends object = object,
 > extends CompositeLayer<GeoArrowH3HexagonLayerProps & ExtraProps> {
   static override defaultProps = defaultProps;
   static override layerName = "GeoArrowH3HexagonLayer";
