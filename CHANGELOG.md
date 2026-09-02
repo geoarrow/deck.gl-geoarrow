@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.2 - 2026-09-02
+
+### What's Changed
+
+* chore(deps): bump pnpm/action-setup from 5 to 6 by @dependabot[bot] in https://github.com/geoarrow/deck.gl-geoarrow/pull/213
+* chore(deps): bump actions/checkout from 6 to 7 by @dependabot[bot] in https://github.com/geoarrow/deck.gl-geoarrow/pull/216
+* chore(deps): bump actions/setup-node from 6.4.0 to 7.0.0 by @dependabot[bot] in https://github.com/geoarrow/deck.gl-geoarrow/pull/217
+* fix: preserve externally provided earcut pool by @MarkusTomio in https://github.com/geoarrow/deck.gl-geoarrow/pull/219
+
+### New Contributors
+
+* @MarkusTomio made their first contribution in https://github.com/geoarrow/deck.gl-geoarrow/pull/219
+
+**Full Changelog**: https://github.com/geoarrow/deck.gl-geoarrow/compare/v0.4.1...v0.4.2
+
 ## 0.4.1 - 2026-05-18
 
 * chore: Export types from types.ts through top-level package by @kylebarron in https://github.com/geoarrow/deck.gl-geoarrow/pull/210
