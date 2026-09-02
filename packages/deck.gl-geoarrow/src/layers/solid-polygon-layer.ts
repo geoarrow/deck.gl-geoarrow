@@ -199,6 +199,7 @@ export class GeoArrowSolidPolygonLayer<
     triangles: Uint32Array | null;
     earcutWorkerPool: Pool<FunctionThread> | null;
     earcutWorkerRequest: Promise<string> | null;
+    ownsEarcutWorkerPool: boolean;
   };
 
   override initializeState(_context: LayerContext): void {
@@ -211,6 +212,7 @@ export class GeoArrowSolidPolygonLayer<
           ? null
           : fetch(this.props.earcutWorkerUrl).then((resp) => resp.text()),
       earcutWorkerPool: this.props.earcutWorkerPool || null,
+      ownsEarcutWorkerPool: false,
     };
   }
 
@@ -243,6 +245,7 @@ export class GeoArrowSolidPolygonLayer<
         this.props.earcutWorkerPoolSize || 1,
       );
       this.state.earcutWorkerPool = pool;
+      this.state.ownsEarcutWorkerPool = true;
       return this.state.earcutWorkerPool;
     } catch (_err) {
       return null;
@@ -250,7 +253,9 @@ export class GeoArrowSolidPolygonLayer<
   }
 
   override async finalizeState(_context: LayerContext): Promise<void> {
-    await this.state?.earcutWorkerPool?.terminate();
+    if (this.state?.ownsEarcutWorkerPool) {
+      await this.state?.earcutWorkerPool?.terminate();
+    }
     console.log("terminated");
   }
 
