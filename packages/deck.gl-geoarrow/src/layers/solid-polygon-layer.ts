@@ -309,34 +309,29 @@ export class GeoArrowSolidPolygonLayer<
       return this._earcutPolygonVectorMainThread(polygonData);
     }
 
-    let result: Uint32Array | null = null;
     const metricId = (Date.now() + Math.floor(Math.random() * 1000)).toString();
     if (this.props.metrics) {
       console.time(metricId);
     }
 
-    // TODO: Note here that [when applicable] we do this conversion twice -
-    // one for triangulation (earcut) here and the other for rendering later.
-    if (isGeomSeparate(polygonData)) {
-      polygonData = getInterleavedPolygon(polygonData);
-    }
-    const [preparedPolygonData, arrayBuffers] = ga.worker.preparePostMessage(
-      polygonData,
-      true,
+    // Clone only when a worker is free, so layers queued behind a busy pool
+    // (e.g. many record batches arriving at once) don't each hold a copy.
+    const result = await pool.queue(
+      async (earcutWorker: FunctionThread<[unknown], Uint32Array>) => {
+        // TODO: Note here that [when applicable] we do this conversion twice -
+        // one for triangulation (earcut) here and the other for rendering later.
+        const interleavedPolygonData = isGeomSeparate(polygonData)
+          ? getInterleavedPolygon(polygonData)
+          : polygonData;
+        const [preparedPolygonData, arrayBuffers] =
+          ga.worker.preparePostMessage(interleavedPolygonData, true);
+        return earcutWorker(Transfer(preparedPolygonData, arrayBuffers));
+      },
     );
-    pool.queue(async (earcutWorker: FunctionThread<[unknown], Uint32Array>) => {
-      const earcutTriangles = await earcutWorker(
-        Transfer(preparedPolygonData, arrayBuffers),
-      );
-      result = earcutTriangles;
-    });
 
-    await pool.completed();
     if (this.props.metrics) {
       console.timeEnd(metricId);
     }
-
-    assert(result !== null);
 
     return result;
   }
@@ -361,35 +356,30 @@ export class GeoArrowSolidPolygonLayer<
       return this._earcutMultiPolygonVectorMainThread(multiPolygonData);
     }
 
-    let result: Uint32Array | null = null;
     const metricId = (Date.now() + Math.floor(Math.random() * 1000)).toString();
     if (this.props.metrics) {
       console.time(metricId);
     }
 
-    let polygonData = ga.child.getMultiPolygonChild(multiPolygonData);
-    // TODO: Note here that [when applicable] we do this conversion twice -
-    // one for triangulation (earcut) here and the other for rendering later.
-    if (isGeomSeparate(polygonData)) {
-      polygonData = getInterleavedPolygon(polygonData);
-    }
-    const [preparedPolygonData, arrayBuffers] = ga.worker.preparePostMessage(
-      polygonData,
-      true,
+    // Clone only when a worker is free, so layers queued behind a busy pool
+    // (e.g. many record batches arriving at once) don't each hold a copy.
+    const result = await pool.queue(
+      async (earcutWorker: FunctionThread<[unknown], Uint32Array>) => {
+        let polygonData = ga.child.getMultiPolygonChild(multiPolygonData);
+        // TODO: Note here that [when applicable] we do this conversion twice -
+        // one for triangulation (earcut) here and the other for rendering later.
+        if (isGeomSeparate(polygonData)) {
+          polygonData = getInterleavedPolygon(polygonData);
+        }
+        const [preparedPolygonData, arrayBuffers] =
+          ga.worker.preparePostMessage(polygonData, true);
+        return earcutWorker(Transfer(preparedPolygonData, arrayBuffers));
+      },
     );
-    pool.queue(async (earcutWorker: FunctionThread<[unknown], Uint32Array>) => {
-      const earcutTriangles = await earcutWorker(
-        Transfer(preparedPolygonData, arrayBuffers),
-      );
-      result = earcutTriangles;
-    });
 
-    await pool.completed();
     if (this.props.metrics) {
       console.timeEnd(metricId);
     }
-
-    assert(result !== null);
 
     return result;
   }
