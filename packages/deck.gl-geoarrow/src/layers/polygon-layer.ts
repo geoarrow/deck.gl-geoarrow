@@ -146,7 +146,8 @@ type _GeoArrowPolygonLayerProps = {
    * helpful if you're rendering many Polygon layers and want to share a pool
    * between them.
    *
-   * If not provided, a pool will be created automatically.
+   * If not provided, a pool is created from `earcutWorkerUrl` when that is set.
+   * Otherwise triangulation runs on the main thread.
    *
    * As of v0.4, layers have been refactored to take in a _RecordBatch_ as
    * input, instead of a table. This means that if a worker pool is created as
@@ -158,8 +159,11 @@ type _GeoArrowPolygonLayerProps = {
   /**
    * URL to worker that performs earcut triangulation.
    *
-   * By default this loads from the jsdelivr CDN, but end users may want to host
-   * this on their own domain.
+   * No worker is loaded unless you set this. Pass `EARCUT_WORKER_CDN_URL` to
+   * load the worker from jsDelivr, or serve
+   * `@geoarrow/geoarrow-js/earcut.worker.min.js` from your own origin.
+   *
+   * @default null
    */
   earcutWorkerUrl?: string | URL | null;
 
