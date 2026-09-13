@@ -200,6 +200,7 @@ export class GeoArrowSolidPolygonLayer<
     earcutWorkerPool: Pool<FunctionThread> | null;
     earcutWorkerRequest: Promise<string> | null;
     ownsEarcutWorkerPool: boolean;
+    earcutAbortController: AbortController;
   };
 
   override initializeState(_context: LayerContext): void {
@@ -213,6 +214,7 @@ export class GeoArrowSolidPolygonLayer<
           : fetch(this.props.earcutWorkerUrl).then((resp) => resp.text()),
       earcutWorkerPool: this.props.earcutWorkerPool || null,
       ownsEarcutWorkerPool: false,
+      earcutAbortController: new AbortController(),
     };
   }
 
@@ -222,7 +224,7 @@ export class GeoArrowSolidPolygonLayer<
     if (this.state.earcutWorkerPool) return this.state.earcutWorkerPool;
 
     const workerText = await this.state.earcutWorkerRequest;
-    if (!workerText) {
+    if (!workerText || this.state.earcutAbortController.signal.aborted) {
       return null;
     }
 
@@ -253,6 +255,7 @@ export class GeoArrowSolidPolygonLayer<
   }
 
   override async finalizeState(_context: LayerContext): Promise<void> {
+    this.state?.earcutAbortController?.abort();
     if (this.state?.ownsEarcutWorkerPool) {
       await this.state?.earcutWorkerPool?.terminate();
     }
@@ -261,13 +264,16 @@ export class GeoArrowSolidPolygonLayer<
   async updateData() {
     const { data: batch } = this.props;
     const earcutTriangles = await this._updateEarcut(batch);
+    if (this.state.earcutAbortController.signal.aborted) {
+      return;
+    }
     this.setState({
       batch: this.props.data,
       triangles: earcutTriangles,
     });
   }
 
-  async _updateEarcut(batch: arrow.RecordBatch): Promise<Uint32Array> {
+  async _updateEarcut(batch: arrow.RecordBatch): Promise<Uint32Array | null> {
     const polygonData = getGeometryData(batch, EXTENSION_NAME.POLYGON);
     if (polygonData !== null && ga.data.isPolygonData(polygonData)) {
       return this._earcutPolygonData(polygonData);
@@ -299,16 +305,41 @@ export class GeoArrowSolidPolygonLayer<
     throw new Error("geometryColumn not Polygon or MultiPolygon");
   }
 
+  async _queueEarcutTask(
+    pool: Pool<FunctionThread>,
+    run: (
+      earcutWorker: FunctionThread<[unknown], Uint32Array>,
+    ) => Promise<Uint32Array>,
+  ): Promise<Uint32Array | null> {
+    const { signal } = this.state.earcutAbortController;
+    const task = pool.queue(run);
+    let onAbort!: () => void;
+    const aborted = new Promise<null>((resolve) => {
+      onAbort = () => {
+        task.cancel();
+        resolve(null);
+      };
+      signal.addEventListener("abort", onAbort, { once: true });
+    });
+    try {
+      return await Promise.race([task, aborted]);
+    } finally {
+      signal.removeEventListener("abort", onAbort);
+    }
+  }
+
   async _earcutPolygonData(
     polygonData: ga.data.PolygonData,
-  ): Promise<Uint32Array> {
+  ): Promise<Uint32Array | null> {
+    const { signal } = this.state.earcutAbortController;
+    if (signal.aborted) return null;
     const pool = await this.initEarcutPool();
+    if (signal.aborted) return null;
     // Fallback if pool couldn't be created
     if (!pool) {
       return this._earcutPolygonVectorMainThread(polygonData);
     }
 
-    let result: Uint32Array | null = null;
     const metricId = (Date.now() + Math.floor(Math.random() * 1000)).toString();
     if (this.props.metrics) {
       console.time(metricId);
@@ -323,21 +354,15 @@ export class GeoArrowSolidPolygonLayer<
       polygonData,
       true,
     );
-    pool.queue(async (earcutWorker: FunctionThread<[unknown], Uint32Array>) => {
-      const earcutTriangles = await earcutWorker(
-        Transfer(preparedPolygonData, arrayBuffers),
+    try {
+      return await this._queueEarcutTask(pool, async (earcutWorker) =>
+        earcutWorker(Transfer(preparedPolygonData, arrayBuffers)),
       );
-      result = earcutTriangles;
-    });
-
-    await pool.completed();
-    if (this.props.metrics) {
-      console.timeEnd(metricId);
+    } finally {
+      if (this.props.metrics) {
+        console.timeEnd(metricId);
+      }
     }
-
-    assert(result !== null);
-
-    return result;
   }
 
   _earcutPolygonVectorMainThread(
@@ -353,14 +378,16 @@ export class GeoArrowSolidPolygonLayer<
 
   async _earcutMultiPolygonData(
     multiPolygonData: ga.data.MultiPolygonData,
-  ): Promise<Uint32Array> {
+  ): Promise<Uint32Array | null> {
+    const { signal } = this.state.earcutAbortController;
+    if (signal.aborted) return null;
     const pool = await this.initEarcutPool();
+    if (signal.aborted) return null;
     // Fallback if pool couldn't be created
     if (!pool) {
       return this._earcutMultiPolygonVectorMainThread(multiPolygonData);
     }
 
-    let result: Uint32Array | null = null;
     const metricId = (Date.now() + Math.floor(Math.random() * 1000)).toString();
     if (this.props.metrics) {
       console.time(metricId);
@@ -376,21 +403,15 @@ export class GeoArrowSolidPolygonLayer<
       polygonData,
       true,
     );
-    pool.queue(async (earcutWorker: FunctionThread<[unknown], Uint32Array>) => {
-      const earcutTriangles = await earcutWorker(
-        Transfer(preparedPolygonData, arrayBuffers),
+    try {
+      return await this._queueEarcutTask(pool, async (earcutWorker) =>
+        earcutWorker(Transfer(preparedPolygonData, arrayBuffers)),
       );
-      result = earcutTriangles;
-    });
-
-    await pool.completed();
-    if (this.props.metrics) {
-      console.timeEnd(metricId);
+    } finally {
+      if (this.props.metrics) {
+        console.timeEnd(metricId);
+      }
     }
-
-    assert(result !== null);
-
-    return result;
   }
 
   _earcutMultiPolygonVectorMainThread(
