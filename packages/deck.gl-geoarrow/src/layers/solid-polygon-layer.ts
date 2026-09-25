@@ -45,7 +45,7 @@ import { validateAccessors } from "../utils/validate";
  * Pass this as `earcutWorkerUrl` to load the worker from the CDN.
  */
 export const EARCUT_WORKER_CDN_URL =
-  "https://cdn.jsdelivr.net/npm/@geoarrow/geoarrow-js@0.3.0/dist/earcut-worker.min.js";
+  "https://cdn.jsdelivr.net/npm/@geoarrow/geoarrow-js@0.3.3/dist/earcut.worker.min.js";
 
 /** A helper function to initialize a worker threadpool for earcut */
 export async function initEarcutPool(
