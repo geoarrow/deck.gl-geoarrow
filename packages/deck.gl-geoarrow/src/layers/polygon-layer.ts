@@ -189,7 +189,7 @@ const {
 // Default props added by us
 const ourDefaultProps: Pick<
   GeoArrowPolygonLayerProps,
-  "_normalize" | "_windingOrder" | "_validate"
+  "_normalize" | "_windingOrder" | "_validate" | "earcutWorkerUrl"
 > = {
   // Note: this diverges from upstream, where here we default to no
   // normalization
@@ -198,6 +198,8 @@ const ourDefaultProps: Pick<
   _windingOrder: "CCW",
 
   _validate: true,
+
+  earcutWorkerUrl: null,
 };
 
 // @ts-expect-error Type error in merging default props with ours
