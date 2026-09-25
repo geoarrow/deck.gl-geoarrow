@@ -37,6 +37,7 @@ export { GeoArrowScatterplotLayer } from "./layers/scatterplot-layer.js";
 
 export type { GeoArrowSolidPolygonLayerProps } from "./layers/solid-polygon-layer.js";
 export {
+  EARCUT_WORKER_CDN_URL,
   GeoArrowSolidPolygonLayer,
   initEarcutPool,
 } from "./layers/solid-polygon-layer.js";

@@ -293,7 +293,7 @@ importers:
   packages/deck.gl-geoarrow:
     dependencies:
       '@geoarrow/geoarrow-js':
-        specifier: ^0.3.0
+        specifier: ^0.3.3
         version: 0.3.3(apache-arrow@21.1.0)
       threads:
         specifier: ^1.7.0
@@ -1836,6 +1836,7 @@ packages:
 
   crypto-js@4.2.0:
     resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
+    deprecated: Active development of CryptoJS has been discontinued. This library is no longer maintained.
 
   csscolorparser@1.0.3:
     resolution: {integrity: sha512-umPSgYwZkdFoUrH5hIq5kf0wPSXiro51nPw0j2K/c83KflkPSTBGMz6NJvMB+07VlL0y7VPo6QJcDjcgKTTm3w==}

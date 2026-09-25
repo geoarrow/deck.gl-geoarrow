@@ -14,7 +14,7 @@ This is just a _glue library_ to deck.gl. It generates the same layer objects as
 - **Memory-efficient**: no intermediate data representation and no garbage-collector overhead.
 - **Full layer customization**: Use the same layer properties as in the upstream deck.gl layer documentation. Any _accessor_ (layer property prefixed with `get*`) can be passed an Arrow [`Data`](https://arrow.apache.org/js/current/classes/Arrow.dom.Data.html).
 - **Input validation**. Validation can be turned off via the `_validate` property on most layer types.
-- **Multi-threaded polygon triangulation**. When rendering polygon layers, a process called [polygon triangulation](https://en.wikipedia.org/wiki/Polygon_triangulation) must happen on the CPU before data can be copied to the GPU. Ordinarily, this can block the main thread for several seconds, but the `GeoArrowSolidPolygonLayer` will perform this process off the main thread, on up to 8 web workers.
+- **Multi-threaded polygon triangulation**. When rendering polygon layers, a process called [polygon triangulation](https://en.wikipedia.org/wiki/Polygon_triangulation) must happen on the CPU before data can be copied to the GPU. Ordinarily, this can block the main thread for several seconds, but `GeoArrowPolygonLayer` and `GeoArrowSolidPolygonLayer` can perform this process off the main thread on web workers when you pass `earcutWorkerUrl` or `earcutWorkerPool`. Pass `EARCUT_WORKER_CDN_URL` to load the worker from jsDelivr, or serve `@geoarrow/geoarrow-js/earcut.worker.min.js` from your own origin.
 - **Progressive rendering support**. For streaming-capable data formats like Arrow IPC and Parquet, you can render a GeoArrow layer per chunk as the data loads.
 
 ## Examples
