@@ -51,7 +51,7 @@
     "extends": "../../package.json"
   },
   "dependencies": {
-    "@geoarrow/geoarrow-js": "^0.3.0",
+    "@geoarrow/geoarrow-js": "^0.3.3",
     "threads": "^1.7.0"
   }
 }

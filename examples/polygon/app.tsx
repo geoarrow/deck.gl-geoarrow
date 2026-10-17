@@ -1,4 +1,7 @@
-import { GeoArrowPolygonLayer } from "@geoarrow/deck.gl-geoarrow";
+import {
+  EARCUT_WORKER_CDN_URL,
+  GeoArrowPolygonLayer,
+} from "@geoarrow/deck.gl-geoarrow";
 import * as arrow from "apache-arrow";
 import type { Layer, PickingInfo } from "deck.gl";
 import DeckGL from "deck.gl";
@@ -71,10 +74,7 @@ function Root() {
         positionFormat: "XY",
         _normalize: false,
         autoHighlight: false,
-        // Note: change this version string if needed
-        earcutWorkerUrl: new URL(
-          "https://cdn.jsdelivr.net/npm/@geoarrow/geoarrow-js@0.3.0/dist/earcut-worker.min.js",
-        ),
+        earcutWorkerUrl: EARCUT_WORKER_CDN_URL,
       }),
     );
 
